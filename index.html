@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SGC – Leprechaun Riches</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>SGC – Leprechaun Riches</h1>
+
+<section>
+  <p><strong>State:</strong> <span id="state">IDLE</span></p>
+  <p><strong>Saldo:</strong> Rp <span id="balance">500000</span></p>
+</section>
+
+<section>
+  <button onclick="startSession()">START SESSION</button>
+  <button onclick="spin()">+ SPIN</button>
+  <button onclick="bonus()">BONUS TRIGGERED</button>
+  <button onclick="updateBalance()">UPDATE SALDO</button>
+</section>
+
+<script src="fsm.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

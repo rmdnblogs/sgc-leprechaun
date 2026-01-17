@@ -1,0 +1,18 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 16px;
+  background: #111;
+  color: #eee;
+}
+
+button {
+  margin: 6px 0;
+  padding: 12px;
+  width: 100%;
+  font-size: 16px;
+}
+
+button:nth-child(3) {
+  background: #b00020;
+  color: white;
+}
