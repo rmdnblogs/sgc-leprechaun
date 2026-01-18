@@ -4,26 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SGC – Leprechaun Riches</title>
-
-  <!-- FIX: nama file CSS benar -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
 
 <h1>SGC – Leprechaun Riches</h1>
 
-<div>State: <strong id="state"></strong></div>
-<div id="info"></div>
-<div>Saldo: <strong id="balance"></strong></div>
+<div class="panel">
+  <div>State: <strong id="state"></strong></div>
+  <div id="info"></div>
+  <div>Saldo: <strong id="balance"></strong></div>
+</div>
 
+<input id="initialBalance" type="number" placeholder="Saldo awal (Rp)" />
 <input id="win" type="number" placeholder="Win amount (Rp)" />
 
 <div class="controls">
-  <input
-  id="initialBalance"
-  type="number"
-  placeholder="Saldo awal (Rp)"
-/>
   <button id="btnStart">START SESSION</button>
   <button id="btnSpin">+ SPIN</button>
   <button id="btnBonus">BONUS TRIGGERED</button>
@@ -31,8 +27,6 @@
   <button id="btnReset">RESET</button>
 </div>
 
-<!-- FIX UTAMA: path JS HARUS SESUAI -->
 <script type="module" src="./app.js"></script>
-
 </body>
-    </html>
+</html>
