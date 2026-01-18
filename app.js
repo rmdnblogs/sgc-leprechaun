@@ -56,12 +56,21 @@ function send(event) {
 /* ===== EVENTS ===== */
 
 // START SESSION
+const saldoInput = document.getElementById('saldo');
+
 btnStart.onclick = () => {
-  const val = Number(initialBalanceInput.value);
-  if (!val || val <= 0) {
-    alert('Masukkan saldo awal yang valid');
+  const saldoAwal = Number(saldoInput.value);
+
+  if (!saldoAwal || saldoAwal <= 0) {
+    alert('Saldo awal tidak valid');
     return;
   }
+
+  m.ctx.balance = saldoAwal;
+  m.ctx.riskBudget = saldoAwal * 0.2;
+
+  send('START');
+};
 
   m.ctx.balance = val;
   RISK = val * 0.2;
@@ -78,8 +87,6 @@ btnStart.onclick = () => {
 
 // SPIN
 btnSpin.onclick = () => {
-  if (m.state !== 'ACTIVE') return;
-
   const win = Number(winInput.value || 0);
 
   m.ctx.spinsInBlock++;
@@ -89,16 +96,32 @@ btnSpin.onclick = () => {
   m.ctx.balance += win - BET;
 
   if (m.ctx.spinsInBlock === 30) {
-    const pnl = closeBlock(m.ctx.blockStake, m.ctx.blockReturn);
+    const pnl = closeBlock(
+      m.ctx.blockStake,
+      m.ctx.blockReturn
+    );
+
     m.ctx.blocksPnL.push(pnl);
 
     const exit = shouldExit({
       blockIndex: m.ctx.blocksPnL.length,
       blocksPnL: m.ctx.blocksPnL,
-      riskBudget: RISK,
+      riskBudget: m.ctx.riskBudget,
       bonusHit: false
     });
 
+    m.ctx.spinsInBlock = 0;
+    m.ctx.blockStake = 0;
+    m.ctx.blockReturn = 0;
+
+    if (exit) {
+      send('RESET');
+      return;
+    }
+  }
+
+  render();
+};
     m.ctx.spinsInBlock = 0;
     m.ctx.blockStake = 0;
     m.ctx.blockReturn = 0;
