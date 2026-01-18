@@ -1,18 +1,28 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
   padding: 16px;
-  background: #111;
-  color: #eee;
 }
 
 button {
-  margin: 6px 0;
-  padding: 12px;
-  width: 100%;
-  font-size: 16px;
+  margin: 4px;
+  padding: 8px 12px;
 }
 
-button:nth-child(3) {
-  background: #b00020;
-  color: white;
+.controls {
+  margin-top: 12px;
+}
+
+.bonus-exit {
+  background: #2b0000 !important;
+}
+
+.bonus-exit::before {
+  content: "BONUS HIT — EXIT MANDATORY";
+  display: block;
+  color: #ff4d4d;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
 }
