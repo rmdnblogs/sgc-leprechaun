@@ -1,48 +1,76 @@
-let state = State.IDLE;
+import { transition } from './fsm.js';
+import { closeBlock } from './analytics.js';
+import { shouldExit } from './decision.js';
+import { uiLock } from './ui-lock.js';
 
-const ctx = {
-  initialBalance: 500000,
-  balance: 500000,
-  betSize: 1000,
-  spinCount: 0,
-  spinLimit: 500,
-  startTime: 0,
-  timeLimitMs: 30 * 60 * 1000 // 30 menit
+const BET = 1000;
+const MODAL = 500000;
+const RISK = MODAL * 0.2;
+
+let m = {
+  state: 'IDLE',
+  ctx: {
+    balance: MODAL,
+    session: 1,
+    blocksPnL: [],
+    spinsInBlock: 0,
+    totalSpins: 0,
+    blockStake: 0,
+    blockReturn: 0
+  }
 };
 
 function render() {
-  document.getElementById("state").innerText = state;
-  document.getElementById("balance").innerText = ctx.balance;
+  state.textContent = m.state;
+  balance.textContent = `Rp ${m.ctx.balance}`;
+  info.textContent = `Session ${m.ctx.session} | Spins ${m.ctx.totalSpins}/120 | Blocks ${m.ctx.blocksPnL.length}`;
+  uiLock(m.state);
 }
 
-function startSession() {
-  ctx.startTime = Date.now();
-  ctx.spinCount = 0;
-  state = transition(state, Event.START, ctx);
+function send(e) {
+  m = transition(m, e);
   render();
 }
 
-function spin() {
-  ctx.spinCount++;
-  state = transition(state, Event.SPIN, ctx);
-  render();
-}
+btnStart.onclick = () => send('START');
 
-function bonus() {
-  state = transition(state, Event.BONUS_TRIGGERED, ctx);
-  alert("BONUS EXIT — SESSION LOCKED");
-  render();
-}
+btnSpin.onclick = () => {
+  const win = Number(winInput.value || 0);
 
-function updateBalance() {
-  const input = prompt("Masukkan saldo terbaru:");
-  const newBalance = parseInt(input);
+  m.ctx.spinsInBlock++;
+  m.ctx.totalSpins++;
+  m.ctx.blockStake += BET;
+  m.ctx.blockReturn += win;
+  m.ctx.balance += win - BET;
 
-  if (!isNaN(newBalance)) {
-    ctx.balance = newBalance;
-    state = transition(state, Event.UPDATE_BALANCE, ctx);
-    render();
+  if (m.ctx.spinsInBlock === 30) {
+    const pnl = closeBlock(m.ctx.blockStake, m.ctx.blockReturn);
+    m.ctx.blocksPnL.push(pnl);
+
+    const exit = shouldExit({
+      blockIndex: m.ctx.blocksPnL.length,
+      blocksPnL: m.ctx.blocksPnL,
+      riskBudget: RISK,
+      bonusHit: false
+    });
+
+    m.ctx.spinsInBlock = 0;
+    m.ctx.blockStake = 0;
+    m.ctx.blockReturn = 0;
+
+    if (exit) send('RESET');
   }
-}
+  render();
+};
+
+btnBonus.onclick = () => send('BONUS');
+btnUpdate.onclick = () => send('UPDATE_PNL');
+btnReset.onclick = () => {
+  m.ctx.session++;
+  m.ctx.blocksPnL = [];
+  m.ctx.totalSpins = 0;
+  m.ctx.spinsInBlock = 0;
+  send('RESET');
+};
 
 render();
