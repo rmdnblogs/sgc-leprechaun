@@ -8,6 +8,7 @@ const elState   = document.getElementById('state');
 const elBalance = document.getElementById('balance');
 const elInfo    = document.getElementById('info');
 const winInput  = document.getElementById('win');
+const initialBalanceInput = document.getElementById('initialBalance');
 
 const btnStart  = document.getElementById('btnStart');
 const btnSpin   = document.getElementById('btnSpin');
@@ -15,16 +16,14 @@ const btnBonus  = document.getElementById('btnBonus');
 const btnUpdate = document.getElementById('btnUpdate');
 const btnReset  = document.getElementById('btnReset');
 
-/* ===== PARAMETER ===== */
-const BET   = 1000;
-const MODAL = 500000;
-const RISK  = MODAL * 0.2;
+const BET = 1000;
+let RISK = 0; // dihitung saat START
 
 /* ===== MACHINE ===== */
 let m = {
   state: 'IDLE',
   ctx: {
-    balance: MODAL,
+    balance: 0,
     session: 1,
     blocksPnL: [],
     spinsInBlock: 0,
@@ -53,22 +52,27 @@ function send(event) {
 }
 
 /* ===== EVENTS ===== */
-btnStart.onclick = () => send('START');
+btnStart.onclick = () => {
+  const val = Number(initialBalanceInput.value);
 
-btnSpin.onclick = () => {
-  const win = Number(winInput.value || 0);
+  if (!val || val <= 0) {
+    alert("Masukkan saldo awal yang valid");
+    return;
+  }
 
-  m.ctx.spinsInBlock++;
-  m.ctx.totalSpins++;
-  m.ctx.blockStake += BET;
-  m.ctx.blockReturn += win;
-  m.ctx.balance += win - BET;
+  m.ctx.balance = val;
+  RISK = val * 0.2;
 
-  if (m.ctx.spinsInBlock === 30) {
-    const pnl = closeBlock(
-      m.ctx.blockStake,
-      m.ctx.blockReturn
-    );
+  m.ctx.spinsInBlock = 0;
+  m.ctx.totalSpins  = 0;
+  m.ctx.blocksPnL   = [];
+  m.ctx.blockStake  = 0;
+  m.ctx.blockReturn = 0;
+
+  initialBalanceInput.disabled = true;
+
+  send('START');
+};
 
     m.ctx.blocksPnL.push(pnl);
 
@@ -100,6 +104,11 @@ btnReset.onclick = () => {
   m.ctx.blocksPnL = [];
   m.ctx.totalSpins = 0;
   m.ctx.spinsInBlock = 0;
+  m.ctx.balance = 0;
+
+  initialBalanceInput.disabled = false;
+  initialBalanceInput.value = "";
+
   send('RESET');
 };
 
