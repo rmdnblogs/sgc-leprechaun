@@ -3,12 +3,13 @@ import { closeBlock } from './analytics.js';
 import { shouldExit } from './decision.js';
 import { uiLock } from './ui-lock.js';
 
-/* ===== DOM BINDING (WAJIB) ===== */
+/* ===== DOM ===== */
 const elState   = document.getElementById('state');
 const elBalance = document.getElementById('balance');
 const elInfo    = document.getElementById('info');
-const winInput  = document.getElementById('win');
+
 const initialBalanceInput = document.getElementById('initialBalance');
+const winInput  = document.getElementById('win');
 
 const btnStart  = document.getElementById('btnStart');
 const btnSpin   = document.getElementById('btnSpin');
@@ -16,8 +17,9 @@ const btnBonus  = document.getElementById('btnBonus');
 const btnUpdate = document.getElementById('btnUpdate');
 const btnReset  = document.getElementById('btnReset');
 
+/* ===== PARAM ===== */
 const BET = 1000;
-let RISK = 0; // dihitung saat START
+let RISK = 0;
 
 /* ===== MACHINE ===== */
 let m = {
@@ -35,9 +37,9 @@ let m = {
 
 /* ===== RENDER ===== */
 function render() {
-  elState.textContent   = m.state;
+  elState.textContent = m.state;
   elBalance.textContent = `Rp ${m.ctx.balance}`;
-  elInfo.textContent    =
+  elInfo.textContent =
     `Session ${m.ctx.session} | ` +
     `Spins ${m.ctx.totalSpins}/120 | ` +
     `Blocks ${m.ctx.blocksPnL.length}`;
@@ -45,35 +47,49 @@ function render() {
   uiLock(m.state);
 }
 
-/* ===== FSM DISPATCH ===== */
+/* ===== FSM ===== */
 function send(event) {
   m = transition(m, event);
   render();
 }
 
 /* ===== EVENTS ===== */
+
+// START SESSION
 btnStart.onclick = () => {
   const val = Number(initialBalanceInput.value);
-
   if (!val || val <= 0) {
-    alert("Masukkan saldo awal yang valid");
+    alert('Masukkan saldo awal yang valid');
     return;
   }
 
   m.ctx.balance = val;
   RISK = val * 0.2;
 
+  m.ctx.blocksPnL = [];
   m.ctx.spinsInBlock = 0;
-  m.ctx.totalSpins  = 0;
-  m.ctx.blocksPnL   = [];
-  m.ctx.blockStake  = 0;
+  m.ctx.totalSpins = 0;
+  m.ctx.blockStake = 0;
   m.ctx.blockReturn = 0;
 
   initialBalanceInput.disabled = true;
-
   send('START');
 };
 
+// SPIN
+btnSpin.onclick = () => {
+  if (m.state !== 'ACTIVE') return;
+
+  const win = Number(winInput.value || 0);
+
+  m.ctx.spinsInBlock++;
+  m.ctx.totalSpins++;
+  m.ctx.blockStake += BET;
+  m.ctx.blockReturn += win;
+  m.ctx.balance += win - BET;
+
+  if (m.ctx.spinsInBlock === 30) {
+    const pnl = closeBlock(m.ctx.blockStake, m.ctx.blockReturn);
     m.ctx.blocksPnL.push(pnl);
 
     const exit = shouldExit({
@@ -84,7 +100,7 @@ btnStart.onclick = () => {
     });
 
     m.ctx.spinsInBlock = 0;
-    m.ctx.blockStake  = 0;
+    m.ctx.blockStake = 0;
     m.ctx.blockReturn = 0;
 
     if (exit) {
@@ -96,18 +112,31 @@ btnStart.onclick = () => {
   render();
 };
 
-btnBonus.onclick  = () => send('BONUS');
-btnUpdate.onclick = () => send('UPDATE_PNL');
+// BONUS
+btnBonus.onclick = () => {
+  if (m.state !== 'ACTIVE') return;
+  send('BONUS'); // BONUS = EXIT WAJIB (SGC)
+};
 
+// UPDATE SALDO (opsional manual)
+btnUpdate.onclick = () => {
+  const win = Number(winInput.value || 0);
+  m.ctx.balance += win;
+  render();
+};
+
+// RESET
 btnReset.onclick = () => {
   m.ctx.session++;
+  m.ctx.balance = 0;
   m.ctx.blocksPnL = [];
   m.ctx.totalSpins = 0;
   m.ctx.spinsInBlock = 0;
-  m.ctx.balance = 0;
+  m.ctx.blockStake = 0;
+  m.ctx.blockReturn = 0;
 
   initialBalanceInput.disabled = false;
-  initialBalanceInput.value = "";
+  initialBalanceInput.value = '';
 
   send('RESET');
 };
