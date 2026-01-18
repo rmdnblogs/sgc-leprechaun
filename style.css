@@ -1,28 +1,27 @@
 body {
-  font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  padding: 16px;
+  background: #0b1220;
+  color: #fff;
+  font-family: system-ui, Arial, sans-serif;
+  padding: 20px;
 }
 
-button {
-  margin: 4px;
-  padding: 8px 12px;
-}
+h1 { margin-bottom: 10px; }
 
-.controls {
-  margin-top: 12px;
-}
+.panel { margin-bottom: 10px; }
 
-.bonus-exit {
-  background: #2b0000 !important;
-}
-
-.bonus-exit::before {
-  content: "BONUS HIT — EXIT MANDATORY";
+input {
   display: block;
-  color: #ff4d4d;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px;
+  margin: 8px 0;
+  padding: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.controls button {
+  margin: 6px 6px 6px 0;
+  padding: 10px 14px;
+}
+
+button:disabled {
+  opacity: 0.4;
 }
