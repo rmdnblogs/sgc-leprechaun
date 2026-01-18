@@ -4,26 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SGC – Leprechaun Riches</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
 
 <h1>SGC – Leprechaun Riches</h1>
 
-<section>
-  <p><strong>State:</strong> <span id="state">IDLE</span></p>
-  <p><strong>Saldo:</strong> Rp <span id="balance">500000</span></p>
-</section>
+<div>State: <strong id="state"></strong></div>
+<div id="info"></div>
+<div>Saldo: <strong id="balance"></strong></div>
 
-<section>
-  <button onclick="startSession()">START SESSION</button>
-  <button onclick="spin()">+ SPIN</button>
-  <button onclick="bonus()">BONUS TRIGGERED</button>
-  <button onclick="updateBalance()">UPDATE SALDO</button>
-</section>
+<input id="win" type="number" placeholder="Win amount (Rp)" />
 
-<script src="fsm.js"></script>
-<script src="app.js"></script>
+<div class="controls">
+  <button id="btnStart">START SESSION</button>
+  <button id="btnSpin">+ SPIN</button>
+  <button id="btnBonus">BONUS TRIGGERED</button>
+  <button id="btnUpdate">UPDATE SALDO</button>
+  <button id="btnReset">RESET</button>
+</div>
+
+<script type="module" src="./dist/app.js"></script>
 </body>
 </html>
