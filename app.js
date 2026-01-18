@@ -3,10 +3,24 @@ import { closeBlock } from './analytics.js';
 import { shouldExit } from './decision.js';
 import { uiLock } from './ui-lock.js';
 
-const BET = 1000;
-const MODAL = 500000;
-const RISK = MODAL * 0.2;
+/* ===== DOM BINDING (WAJIB) ===== */
+const elState   = document.getElementById('state');
+const elBalance = document.getElementById('balance');
+const elInfo    = document.getElementById('info');
+const winInput  = document.getElementById('win');
 
+const btnStart  = document.getElementById('btnStart');
+const btnSpin   = document.getElementById('btnSpin');
+const btnBonus  = document.getElementById('btnBonus');
+const btnUpdate = document.getElementById('btnUpdate');
+const btnReset  = document.getElementById('btnReset');
+
+/* ===== PARAMETER ===== */
+const BET   = 1000;
+const MODAL = 500000;
+const RISK  = MODAL * 0.2;
+
+/* ===== MACHINE ===== */
 let m = {
   state: 'IDLE',
   ctx: {
@@ -20,18 +34,25 @@ let m = {
   }
 };
 
+/* ===== RENDER ===== */
 function render() {
-  state.textContent = m.state;
-  balance.textContent = `Rp ${m.ctx.balance}`;
-  info.textContent = `Session ${m.ctx.session} | Spins ${m.ctx.totalSpins}/120 | Blocks ${m.ctx.blocksPnL.length}`;
+  elState.textContent   = m.state;
+  elBalance.textContent = `Rp ${m.ctx.balance}`;
+  elInfo.textContent    =
+    `Session ${m.ctx.session} | ` +
+    `Spins ${m.ctx.totalSpins}/120 | ` +
+    `Blocks ${m.ctx.blocksPnL.length}`;
+
   uiLock(m.state);
 }
 
-function send(e) {
-  m = transition(m, e);
+/* ===== FSM DISPATCH ===== */
+function send(event) {
+  m = transition(m, event);
   render();
 }
 
+/* ===== EVENTS ===== */
 btnStart.onclick = () => send('START');
 
 btnSpin.onclick = () => {
@@ -44,7 +65,11 @@ btnSpin.onclick = () => {
   m.ctx.balance += win - BET;
 
   if (m.ctx.spinsInBlock === 30) {
-    const pnl = closeBlock(m.ctx.blockStake, m.ctx.blockReturn);
+    const pnl = closeBlock(
+      m.ctx.blockStake,
+      m.ctx.blockReturn
+    );
+
     m.ctx.blocksPnL.push(pnl);
 
     const exit = shouldExit({
@@ -55,16 +80,21 @@ btnSpin.onclick = () => {
     });
 
     m.ctx.spinsInBlock = 0;
-    m.ctx.blockStake = 0;
+    m.ctx.blockStake  = 0;
     m.ctx.blockReturn = 0;
 
-    if (exit) send('RESET');
+    if (exit) {
+      send('RESET');
+      return;
+    }
   }
+
   render();
 };
 
-btnBonus.onclick = () => send('BONUS');
+btnBonus.onclick  = () => send('BONUS');
 btnUpdate.onclick = () => send('UPDATE_PNL');
+
 btnReset.onclick = () => {
   m.ctx.session++;
   m.ctx.blocksPnL = [];
@@ -73,4 +103,5 @@ btnReset.onclick = () => {
   send('RESET');
 };
 
+/* ===== INIT ===== */
 render();
