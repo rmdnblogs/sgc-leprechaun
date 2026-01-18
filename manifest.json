@@ -1,8 +1,8 @@
 {
-  "name": "SGC Leprechaun",
+  "name": "SGC – Leprechaun Riches",
   "short_name": "SGC",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111"
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220"
 }
